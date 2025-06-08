@@ -134,9 +134,9 @@
                                         <td>
                                                                                     @if(is_object($product->brandInfo))
                                             {{ $product->brandInfo->name }}
-                                        @else
-                                            Brand ID: {{ $product->brand }}
-                                        @endif
+                                            @else
+                                                Brand ID: {{ $product->brand }}
+                                            @endif
                                         </td>
                                         <td>
                                             <div><strong>Price:</strong> {{ number_format($product->price, 2) }}</div>
