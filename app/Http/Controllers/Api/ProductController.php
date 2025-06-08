@@ -28,15 +28,8 @@ class ProductController extends Controller
     {
         $perPage = $request->input('per_page', 15);
         
-        try {
-            $products = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'status', 'attributes.attribute'])
-                ->paginate($perPage);
-        } catch (\Exception $e) {
-            // If eager loading fails, try without brandInfo relationship
-            \Log::warning('Eager loading failed, trying without brandInfo: ' . $e->getMessage());
-            $products = Product::with(['category', 'subcategory', 'photos', 'status', 'attributes.attribute'])
-                ->paginate($perPage);
-        }
+        $products = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'status', 'attributes.attribute'])
+            ->paginate($perPage);
             
         $formattedProducts = $this->formatProducts($products->items());
 
@@ -59,15 +52,8 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        try {
-            $product = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'status', 'attributes.attribute'])
-                ->find($id);
-        } catch (\Exception $e) {
-            // If eager loading fails, try without brandInfo relationship
-            \Log::warning('Eager loading failed for product ' . $id . ', trying without brandInfo: ' . $e->getMessage());
-            $product = Product::with(['category', 'subcategory', 'photos', 'status', 'attributes.attribute'])
-                ->find($id);
-        }
+        $product = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'status', 'attributes.attribute'])
+            ->find($id);
 
         if (!$product) {
             return response()->json([
@@ -234,58 +220,6 @@ class ProductController extends Controller
         return $formattedProducts;
     }
     
-    /**
-     * Safely format brand information for a product
-     */
-    private function formatBrandInfo($product)
-    {
-        try {
-            // First check if the relationship is loaded and valid
-            if ($product->relationLoaded('brandInfo') && $product->brandInfo) {
-                return [
-                    'id' => $product->brandInfo->id,
-                    'name' => $product->brandInfo->name
-                ];
-            }
-            
-            // If not loaded, try to load it safely
-            if (!$product->relationLoaded('brandInfo')) {
-                $product->load('brandInfo');
-                if ($product->brandInfo) {
-                    return [
-                        'id' => $product->brandInfo->id,
-                        'name' => $product->brandInfo->name
-                    ];
-                }
-            }
-            
-            // Fallback: try direct database query if we have a brand ID
-            if ($product->brand && is_numeric($product->brand) && $product->brand > 0) {
-                $brand = DB::table('sma_brands')->where('id', $product->brand)->first();
-                if ($brand) {
-                    return [
-                        'id' => $brand->id,
-                        'name' => $brand->name
-                    ];
-                }
-            }
-            
-            // Final fallback
-            return [
-                'id' => $product->brand ?? 0,
-                'name' => 'Unknown'
-            ];
-        } catch (\Exception $e) {
-            // Log the error for debugging but don't break the API
-            \Log::warning('Brand relationship error for product ' . $product->id . ': ' . $e->getMessage());
-            
-            return [
-                'id' => $product->brand ?? 0,
-                'name' => 'Unknown'
-            ];
-        }
-    }
-
     /**
      * Format a single product for API response
      */
@@ -463,7 +397,13 @@ class ProductController extends Controller
                     'image' => $product->subcategory->image,
                 ] : null
             ],
-            'brand' => $this->formatBrandInfo($product),
+            'brand' => is_object($product->brandInfo) ? [
+                'id' => $product->brandInfo->id,
+                'name' => $product->brandInfo->name
+            ] : [
+                'id' => $product->brand,
+                'name' => 'Unknown'
+            ],
             'photos' => $photos,
             'attributes' => $attributes
         ];
