@@ -132,11 +132,11 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if(is_object($product->brand))
-                                                {{ $product->brand->name }}
-                                            @else
-                                                Brand ID: {{ $product->brand }}
-                                            @endif
+                                                                                    @if(is_object($product->brandInfo))
+                                            {{ $product->brandInfo->name }}
+                                        @else
+                                            Brand ID: {{ $product->brand }}
+                                        @endif
                                         </td>
                                         <td>
                                             <div><strong>Price:</strong> {{ number_format($product->price, 2) }}</div>
@@ -284,7 +284,7 @@
                                 <h6 class="border-bottom pb-2">Product Information</h6>
                                 <p><strong>Code:</strong> {{ $product->code }}</p>
                                 <p><strong>Category:</strong> {{ $product->category->name ?? 'N/A' }}</p>
-                                <p><strong>Brand:</strong> {{ is_object($product->brand) ? $product->brand->name : 'Brand ID: '.$product->brand }}</p>
+                                <p><strong>Brand:</strong> {{ is_object($product->brandInfo) ? $product->brandInfo->name : 'Brand ID: '.$product->brand }}</p>
                                 <p><strong>In Stock:</strong> {{ $product->quantity }} units</p>
                             </div>
                         </div>
@@ -386,8 +386,8 @@
             "name": "{{ $product->category->name ?? 'N/A' }}"
         },
         "brand": {
-            "id": {{ is_object($product->brand) ? $product->brand->id : $product->brand }},
-            "name": "{{ is_object($product->brand) ? $product->brand->name : 'Unknown' }}"
+                                "id": {{ is_object($product->brandInfo) ? $product->brandInfo->id : $product->brand }},
+                    "name": "{{ is_object($product->brandInfo) ? $product->brandInfo->name : 'Unknown' }}"
         },
         "photos": [
             @if($product->photos->count() > 0)

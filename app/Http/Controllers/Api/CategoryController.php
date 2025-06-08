@@ -73,7 +73,7 @@ class CategoryController extends Controller
     {
         $perPage = $request->input('per_page', 15);
         
-        $products = Product::with(['category', 'subcategory', 'brand', 'photos', 'status', 'attributes.attribute'])
+        $products = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'status', 'attributes.attribute'])
             ->where('category_id', $id)
             ->paginate($perPage);
         

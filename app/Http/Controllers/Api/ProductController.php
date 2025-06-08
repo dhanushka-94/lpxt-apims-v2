@@ -28,7 +28,7 @@ class ProductController extends Controller
     {
         $perPage = $request->input('per_page', 15);
         
-        $products = Product::with(['category', 'subcategory', 'brand', 'photos', 'status', 'attributes.attribute'])
+        $products = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'status', 'attributes.attribute'])
             ->paginate($perPage);
             
         $formattedProducts = $this->formatProducts($products->items());
@@ -52,7 +52,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with(['category', 'subcategory', 'brand', 'photos', 'status', 'attributes.attribute'])
+        $product = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'status', 'attributes.attribute'])
             ->find($id);
 
         if (!$product) {
@@ -78,7 +78,7 @@ class ProductController extends Controller
         $query = $request->input('query', '');
         $perPage = $request->input('per_page', 15);
 
-        $products = Product::with(['category', 'subcategory', 'brand', 'photos', 'status', 'attributes.attribute'])
+        $products = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'status', 'attributes.attribute'])
             ->where('name', 'like', "%{$query}%")
             ->orWhere('code', 'like', "%{$query}%")
             ->orWhere('second_name', 'like', "%{$query}%")
@@ -107,7 +107,7 @@ class ProductController extends Controller
     {
         $perPage = $request->input('per_page', 15);
         
-        $products = Product::with(['category', 'subcategory', 'brand', 'photos', 'status', 'attributes.attribute'])
+        $products = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'status', 'attributes.attribute'])
             ->where('category_id', $categoryId)
             ->paginate($perPage);
             
@@ -134,7 +134,7 @@ class ProductController extends Controller
     {
         $perPage = $request->input('per_page', 15);
         
-        $products = Product::with(['category', 'subcategory', 'brand', 'photos', 'status', 'attributes.attribute'])
+        $products = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'status', 'attributes.attribute'])
             ->where('brand', $brandId)
             ->paginate($perPage);
             
@@ -163,7 +163,7 @@ class ProductController extends Controller
         $attributeId = $request->input('attribute_id');
         
         // This would need to be modified based on your actual attribute relationships
-        $products = Product::with(['category', 'subcategory', 'brand', 'photos', 'attributes.attribute'])
+        $products = Product::with(['category', 'subcategory', 'brandInfo', 'photos', 'attributes.attribute'])
             ->whereHas('attributes', function($query) use ($attributeId) {
                 $query->where('attribute_id', $attributeId);
             })
@@ -209,7 +209,7 @@ class ProductController extends Controller
     /**
      * Format products for consistent API responses
      */
-    private function formatProducts($products)
+    public function formatProducts($products)
     {
         $formattedProducts = [];
         
@@ -397,9 +397,9 @@ class ProductController extends Controller
                     'image' => $product->subcategory->image,
                 ] : null
             ],
-            'brand' => is_object($product->brand) ? [
-                'id' => $product->brand->id,
-                'name' => $product->brand->name
+            'brand' => is_object($product->brandInfo) ? [
+                'id' => $product->brandInfo->id,
+                'name' => $product->brandInfo->name
             ] : [
                 'id' => $product->brand,
                 'name' => 'Unknown'

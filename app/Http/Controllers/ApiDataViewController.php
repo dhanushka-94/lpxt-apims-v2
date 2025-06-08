@@ -18,7 +18,7 @@ class ApiDataViewController extends Controller
         $query = $request->input('query');
         
         // Query the products with category and brand
-        $productsQuery = Product::with(['category', 'brand', 'photos', 'status']);
+        $productsQuery = Product::with(['category', 'brandInfo', 'photos', 'status']);
         
         // Apply filters if provided
         if ($categoryId) {
